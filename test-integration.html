@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WisdomBase 前后端联调测试</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
+        width: 100%;
+        padding: 40px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .test-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 8px;
+      }
+
+      .test-section h2 {
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+      }
+
+      .test-item {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .test-label {
+        font-weight: 500;
+        color: #333;
+        min-width: 150px;
+      }
+
+      .test-result {
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        flex: 1;
+        word-break: break-all;
+      }
+
+      .result-loading {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+
+      .result-success {
+        background: #e8f5e9;
+        color: #388e3c;
+      }
+
+      .result-error {
+        background: #ffebee;
+        color: #d32f2f;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #5568d3;
+      }
+
+      .btn-primary:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .btn-secondary {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+      }
+
+      .btn-secondary:hover {
+        background: #e8e8e8;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-left: 10px;
+      }
+
+      .badge-success {
+        background: #e8f5e9;
+        color: #388e3c;
+      }
+
+      .badge-error {
+        background: #ffebee;
+        color: #d32f2f;
+      }
+
+      .response-box {
+        background: #1e1e1e;
+        color: #00ff00;
+        padding: 15px;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 10px;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .info-box {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        color: #856404;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #1976d2;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎉 WisdomBase 前后端联调测试</h1>
+      <p class="subtitle">点击按钮进行测试</p>
+
+      <div class="info-box">
+        ℹ️ 确保后端运行在 http://localhost:8000 和前端在 http://localhost:8848
+      </div>
+
+      <!-- 系统信息 -->
+      <div class="test-section">
+        <h2>📊 系统信息</h2>
+        <div class="test-item">
+          <span class="test-label">前端地址:</span>
+          <span class="test-result" id="frontend-url">-</span>
+        </div>
+        <div class="test-item">
+          <span class="test-label">后端地址:</span>
+          <span class="test-result" id="backend-url"
+            >http://localhost:8000</span
+          >
+        </div>
+        <div class="test-item">
+          <span class="test-label">代理配置:</span>
+          <span class="test-result">/api/* → http://localhost:8000</span>
+        </div>
+      </div>
+
+      <!-- 连接测试 -->
+      <div class="test-section">
+        <h2>🔗 连接测试</h2>
+        <div class="test-item">
+          <span class="test-label">后端连接:</span>
+          <span class="test-result" id="backend-status">未测试</span>
+        </div>
+        <div class="test-item">
+          <span class="test-label">API 响应:</span>
+          <span class="test-result" id="api-status">未测试</span>
+        </div>
+        <button class="btn-primary" onclick="testConnection()">测试连接</button>
+      </div>
+
+      <!-- 登录测试 -->
+      <div class="test-section">
+        <h2>🔐 登录测试</h2>
+        <div class="test-item">
+          <span class="test-label">Admin 登录:</span>
+          <span class="test-result" id="login-admin">未测试</span>
+        </div>
+        <div class="test-item">
+          <span class="test-label">Editor 登录:</span>
+          <span class="test-result" id="login-editor">未测试</span>
+        </div>
+        <div class="test-item">
+          <span class="test-label">Viewer 登录:</span>
+          <span class="test-result" id="login-viewer">未测试</span>
+        </div>
+        <div class="button-group">
+          <button class="btn-primary" onclick="testLogin('admin', 'admin123')">
+            测试 Admin
+          </button>
+          <button
+            class="btn-primary"
+            onclick="testLogin('editor', 'editor123')"
+          >
+            测试 Editor
+          </button>
+          <button
+            class="btn-primary"
+            onclick="testLogin('viewer', 'viewer123')"
+          >
+            测试 Viewer
+          </button>
+        </div>
+      </div>
+
+      <!-- 详细响应 -->
+      <div class="test-section">
+        <h2>📋 详细响应</h2>
+        <div class="response-box" id="response-box">等待测试...</div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="button-group">
+        <button class="btn-secondary" onclick="clearResults()">清除结果</button>
+        <button class="btn-primary" onclick="runAllTests()">
+          运行全部测试
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // 初始化前端 URL
+      document.getElementById("frontend-url").textContent =
+        window.location.origin;
+
+      // 输出消息
+      function log(message) {
+        const box = document.getElementById("response-box");
+        box.textContent += message + "\n";
+        box.scrollTop = box.scrollHeight;
+      }
+
+      // 设置状态
+      function setStatus(elementId, status, message) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = "test-result result-" + status;
+        if (status === "loading") {
+          element.innerHTML = '<span class="spinner"></span> ' + message;
+        }
+      }
+
+      // 测试连接
+      async function testConnection() {
+        log("========== 测试连接 ==========");
+        setStatus("backend-status", "loading", "连接中...");
+        setStatus("api-status", "loading", "测试中...");
+
+        try {
+          const response = await fetch("http://localhost:8000/health");
+          if (response.ok) {
+            const data = await response.json();
+            setStatus("backend-status", "success", "✓ 连接成功");
+            setStatus("api-status", "success", "✓ API 响应正常");
+            log("后端响应: " + JSON.stringify(data, null, 2));
+          } else {
+            setStatus(
+              "backend-status",
+              "error",
+              "✗ 连接失败 (HTTP " + response.status + ")",
+            );
+            setStatus("api-status", "error", "✗ API 响应异常");
+          }
+        } catch (error) {
+          setStatus("backend-status", "error", "✗ 无法连接");
+          setStatus("api-status", "error", "✗ " + error.message);
+          log("错误: " + error.message);
+        }
+      }
+
+      // 测试登录
+      async function testLogin(username, password) {
+        log(`========== 测试 ${username} 登录 ==========`);
+        const elementId = "login-" + username;
+        setStatus(elementId, "loading", "登录中...");
+
+        try {
+          const response = await fetch(
+            "http://localhost:8000/api/v1/auth/login",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                username: username,
+                password: password,
+              }),
+            },
+          );
+
+          const data = await response.json();
+          if (data.success) {
+            setStatus(
+              elementId,
+              "success",
+              "✓ 登录成功 (ID: " + data.data.username + ")",
+            );
+            log("登录成功: " + JSON.stringify(data.data, null, 2));
+          } else {
+            setStatus(elementId, "error", "✗ 登录失败: " + data.message);
+            log("登录失败: " + JSON.stringify(data, null, 2));
+          }
+        } catch (error) {
+          setStatus(elementId, "error", "✗ 请求失败: " + error.message);
+          log("错误: " + error.message);
+        }
+      }
+
+      // 清除结果
+      function clearResults() {
+        document.getElementById("response-box").textContent = "等待测试...";
+        document.getElementById("backend-status").textContent = "未测试";
+        document.getElementById("backend-status").className = "test-result";
+        document.getElementById("api-status").textContent = "未测试";
+        document.getElementById("api-status").className = "test-result";
+        ["admin", "editor", "viewer"].forEach((role) => {
+          document.getElementById("login-" + role).textContent = "未测试";
+          document.getElementById("login-" + role).className = "test-result";
+        });
+      }
+
+      // 运行全部测试
+      async function runAllTests() {
+        clearResults();
+        log("========== 开始全部测试 ==========\n");
+
+        await testConnection();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testLogin("admin", "admin123");
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testLogin("editor", "editor123");
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testLogin("viewer", "viewer123");
+
+        log("\n========== 测试完成 ==========");
+      }
+
+      // 页面加载时自动测试连接
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          log("✓ 页面加载完成，可以开始测试");
+        }, 100);
+      });
+    </script>
+  </body>
+</html>

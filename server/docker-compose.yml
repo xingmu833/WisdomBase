@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  # FastAPI 应用
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://wisdombase:wisdombase@postgres:5432/wisdombase
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=False
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=wisdombase
+      - POSTGRES_PASSWORD=wisdombase
+      - POSTGRES_DB=wisdombase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # pgAdmin (可选，用于数据库管理)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@wisdombase.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
